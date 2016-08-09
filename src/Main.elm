@@ -60,6 +60,10 @@ update msg model =
 -- VIEW
 
 
+(=>) : String -> String -> (String, String)
+(=>) attribute value = (attribute, value)
+
+
 view : Model -> Html Msg
 view model =
     svg []
