@@ -1,10 +1,11 @@
 module Main exposing (main)
 
-import Html exposing (Html)
-import Html.Attributes
+import Color
+import Html exposing (Html, div)
+import Html.Attributes as Attr
 import Html.App
-import Svg exposing (svg, circle)
-import Svg.Attributes as Attr
+import Collage as Coll exposing (collage)
+import Element exposing (toHtml)
 
 
 -- MAIN
@@ -66,11 +67,8 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    svg []
-        [ circle
-            [ Attr.cx "50"
-            , Attr.cy "50"
-            , Attr.r "45"
-            , Attr.fill "#0B79CE"
-            ] []
+    div [ Attr.style [ "width" => "100%", "height" => "100%" ] ]
+        [ toHtml <|
+            collage 100 100
+                [ Coll.filled Color.blue <| Coll.rect 100 100 ]
         ]
