@@ -9,7 +9,7 @@ COPY elm-package.json /opt/
 RUN npm install
 RUN elm package install -y
 
-COPY . /opt/
+COPY webpack.config.js /opt/
 
 EXPOSE 8080
 ENTRYPOINT ["npm", "run", "dev"]
