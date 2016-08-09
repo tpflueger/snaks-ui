@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Main exposing (main)
 
 import Html exposing (Html, div, text)
 import Html.App
@@ -16,13 +16,11 @@ init =
     ( "Hello", Cmd.none )
 
 
-
 -- MESSAGES
 
 
 type Msg
     = NoOp
-
 
 
 -- VIEW
@@ -32,7 +30,6 @@ view : Model -> Html Msg
 view model =
     div []
         [ text model ]
-
 
 
 -- UPDATE
@@ -45,14 +42,12 @@ update msg model =
             ( model, Cmd.none )
 
 
-
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
-
 
 
 -- MAIN
