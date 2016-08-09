@@ -16,10 +16,11 @@
   "license": "BSD3",
   "devDependencies": {
     "clean-webpack-plugin": "^0.1.8",
-    "es6-promise": "^3.2.1",
     "css-loader": "^0.23.1",
     "elm-webpack-loader": "3.0.0",
+    "es6-promise": "^3.2.1",
     "file-loader": "^0.8.5",
+    "html-webpack-plugin": "^2.22.0",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1",

@@ -1,6 +1,7 @@
-var path = require('path'),
-	webpack = require('webpack'),
-	CleanWebpackPlugin = require('clean-webpack-plugin');
+const path = require('path');
+const webpack = require('webpack');
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 require('es6-promise').polyfill();
 
@@ -28,6 +29,9 @@ module.exports = {
 		aggregateTimeout: 1000
 	},
 	plugins: [
+        new HtmlWebpackPlugin({
+            title: 'snaks'
+        }),
 		new CleanWebpackPlugin(['dest'], {
 			root: __dirname,
 			verbose: true,
