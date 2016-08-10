@@ -1,9 +1,12 @@
 module Main exposing (main)
 
 import Color
+import Task
+
 import Html exposing (Html, div)
 import Html.Attributes as Attr
 import Html.App
+import Window
 import Collage as Coll exposing (collage)
 import Element exposing (toHtml)
 
@@ -19,36 +22,33 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
-        
+
 
 -- MODEL
 
 
 type alias Model =
-    String
+    { width : Int
+    , height : Int
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( "Hello", Cmd.none )
+    ( Model 0 0, getWindowSize )
 
 
--- MESSAGES
+getWindowSize : Cmd Msg
+getWindowSize =
+    Task.perform (\x -> NoOp) Resize Window.size
+    
+    
+-- UPDATE
 
 
 type Msg
     = NoOp
-
-
--- SUBSCRIPTIONS
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-    
-    
--- UPDATE
+    | Resize Window.Size
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -56,19 +56,29 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+        Resize size ->
+            ( { model | width = size.width, height = size.height }, Cmd.none )
 
 
 -- VIEW
 
 
 (=>) : String -> String -> (String, String)
-(=>) attribute value = (attribute, value)
+(=>) x y = (x, y)
 
 
 view : Model -> Html Msg
 view model =
     div [ Attr.style [ "width" => "100%", "height" => "100%" ] ]
         [ toHtml <|
-            collage 100 100
-                [ Coll.filled Color.blue <| Coll.rect 100 100 ]
+            collage model.width model.height
+                [ Coll.filled Color.blue <| Coll.rect (toFloat model.width) (toFloat model.height) ]
         ]
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Window.resizes (\size -> Resize size)
