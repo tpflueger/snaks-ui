@@ -1,12 +1,10 @@
 module Main exposing (main)
 
 import Color
-import Task
 
 import Html exposing (Html, div)
 import Html.Attributes as Attr
 import Html.App
-import Window
 import Collage as Coll exposing (collage)
 import Element exposing (toHtml)
 
@@ -35,20 +33,14 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model 0 0, getWindowSize )
+    ( Model 0 0, Cmd.none )
 
 
-getWindowSize : Cmd Msg
-getWindowSize =
-    Task.perform (\x -> NoOp) Resize Window.size
-    
-    
 -- UPDATE
 
 
 type Msg
     = NoOp
-    | Resize Window.Size
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -56,8 +48,6 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
-        Resize size ->
-            ( { model | width = size.width, height = size.height }, Cmd.none )
 
 
 -- VIEW
@@ -81,4 +71,4 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Window.resizes (\size -> Resize size)
+    Sub.none
