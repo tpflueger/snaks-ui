@@ -5,27 +5,27 @@ import Update.Message exposing (Msg)
 
 
 type alias Model =
-    { width : Int
-    , height : Int
-    , snake : Snake
-    }
+  { width : Int
+  , height : Int
+  , snake : Snake
+  }
 
 
 type alias Snake =
-    List Vector
+  List Vector
 
 
 type alias Vector =
-    { x : Int
-    , y : Int
-    }
+  { x : Int
+  , y : Int
+  }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model mapSize mapSize initSnake, Cmd.none )
+  ( Model mapSize mapSize initSnake, Cmd.none )
 
 
 initSnake : Snake
 initSnake =
-    [ Vector 2 1, Vector 2 0, Vector 1 0, Vector 0 0 ]
+  [ Vector 2 1, Vector 2 0, Vector 1 0, Vector 0 0 ]
