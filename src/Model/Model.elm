@@ -23,7 +23,7 @@ type alias Vector =
 
 init : ( Model, Cmd Msg )
 init =
-  ( Model mapSize mapSize initSnake, Cmd.none )
+  Model mapSize mapSize initSnake ! [ Cmd.none ]
 
 
 initSnake : Snake
