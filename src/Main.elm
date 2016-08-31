@@ -2,10 +2,8 @@ module Main exposing (main)
 
 import Html.App
 
-import Model.Model as Model exposing (Model, Snake, Vector)
-import Update.Message exposing (Msg)
-import Update.Update as Update
-import View.View as View
+import State
+import View
 
 
 -- MAIN
@@ -14,16 +12,8 @@ import View.View as View
 main : Program Never
 main =
   Html.App.program
-    { init = Model.init
+    { init = State.init
     , view = View.view
-    , update = Update.update
-    , subscriptions = subscriptions
+    , update = State.update
+    , subscriptions = State.subscriptions
     }
-
-
--- SUBSCRIPTIONS
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-  Sub.none
