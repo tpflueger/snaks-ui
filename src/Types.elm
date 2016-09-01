@@ -2,21 +2,21 @@ module Types exposing (..)
 
 
 type Msg
-  = NoOp
+    = NoOp
 
 
 type alias Model =
-  { width : Int
-  , height : Int
-  , snake : Snake
-  }
+    { width : Int
+    , height : Int
+    , snake : Snake
+    }
 
 
 type alias Snake =
-  List Vector
+    List Vector
 
 
 type alias Vector =
-  { x : Int
-  , y : Int
-  }
+    { x : Int
+    , y : Int
+    }
