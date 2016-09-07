@@ -1,6 +1,7 @@
 module State exposing (init, update, subscriptions)
 
 import Char
+import String
 import AnimationFrame
 import Time exposing (millisecond)
 import Keyboard exposing (KeyCode)
@@ -22,7 +23,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ AnimationFrame.diffs Tick
-        , Keyboard.presses ChangeDirection
+        , Keyboard.presses UserInput
         ]
 
 
@@ -36,8 +37,20 @@ update msg model =
             )
                 ! []
 
-        ChangeDirection keycode ->
-            { model | snake = changeSnakeDirection keycode model.snake } ! []
+        UserInput keycode ->
+            let
+                str =
+                    Char.fromCode keycode
+                        |> String.fromChar
+            in
+                if String.contains str "wasd" then
+                    { model
+                        | snake =
+                            changeSnakeDirection keycode model.snake
+                    }
+                        ! []
+                else
+                    init
 
 
 sync : Float -> Model -> Model

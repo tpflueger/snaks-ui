@@ -1,7 +1,7 @@
 module View exposing (view)
 
 import Color exposing (Color)
-import Html exposing (Html, div)
+import Html exposing (Html, div, text)
 import Html.Attributes as Attr
 import Collage exposing (Form)
 import Element exposing (toHtml)
@@ -9,15 +9,21 @@ import Transform
 import Types exposing (Model, Vector, Msg, tileSize, mapSize)
 
 
+mapSizePx : Int
+mapSizePx =
+    mapSize * tileSize
+
+
 view : Model -> Html Msg
 view model =
     div [ Attr.class "game-container" ]
         [ toHtml <|
-            Collage.collage 500
-                500
+            Collage.collage mapSizePx
+                mapSizePx
                 [ renderMap model
                 , renderObjects model
                 ]
+        , text "Press [Space] to reset."
         ]
 
 
@@ -75,7 +81,7 @@ translateObjects : List Form -> Form
 translateObjects objects =
     let
         offset =
-            -mapSize * tileSize // 2 + tileSize // 2 |> toFloat
+            -mapSizePx // 2 + tileSize // 2 |> toFloat
 
         transformation =
             Transform.translation offset offset

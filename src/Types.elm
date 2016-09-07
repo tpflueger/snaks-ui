@@ -5,12 +5,12 @@ import Keyboard exposing (KeyCode)
 
 mapSize : Int
 mapSize =
-    16
+    32
 
 
 tileSize : Int
 tileSize =
-    16
+    14
 
 
 tickLength : Float
@@ -20,7 +20,7 @@ tickLength =
 
 type Msg
     = Tick Float
-    | ChangeDirection KeyCode
+    | UserInput KeyCode
 
 
 type alias Model =
