@@ -7,12 +7,12 @@ require('es6-promise').polyfill();
 
 const PATHS = {
     app: path.join(__dirname, 'src/main.js'),
-    dest: path.join(__dirname, 'dest')
+    dist: path.join(__dirname, 'dist')
 };
 
 module.exports = {
     devServer: {
-        contentBase: PATHS.dest,
+        contentBase: PATHS.dist,
         historyApiFallback: true,
         inline: true,
         progress: true
@@ -21,7 +21,7 @@ module.exports = {
         app: PATHS.app
     },
     output: {
-        path: PATHS.dest,
+        path: PATHS.dist,
         filename: '[name].js'
     },
     watchOptions: {
@@ -32,7 +32,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             title: 'snaks'
         }),
-        new CleanWebpackPlugin(['dest'], {
+        new CleanWebpackPlugin(['dist'], {
             root: __dirname,
             verbose: true,
             dry: false
