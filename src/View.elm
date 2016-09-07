@@ -23,7 +23,8 @@ view model =
                 [ renderMap model
                 , renderObjects model
                 ]
-        , text "Press [Space] to reset."
+        , div [] [ text "Control snake with WASD." ]
+        , div [] [ text "Press [Space] to reset." ]
         ]
 
 
