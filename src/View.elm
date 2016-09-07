@@ -21,23 +21,25 @@ view model =
             Collage.collage mapSizePx
                 mapSizePx
                 [ renderMap model
-                , renderObjects model
+                , renderSnake model
+                , [ renderFood model ] |> translateObjects
                 ]
         , text "Press [Space] to reset."
         ]
 
 
-renderObjects : Model -> Form
-renderObjects model =
-    let
-        color =
-            if model.collision then
-                Color.red
-            else
-                Color.green
-    in
-        List.map (renderSegment color) model.snake
-            |> translateObjects
+renderFood : Model -> Form
+renderFood model =
+    case model.food of
+        Nothing ->
+            Collage.square 0
+                |> Collage.filled Color.blue
+
+        Just { x, y } ->
+            toFloat tileSize
+                |> Collage.square
+                |> Collage.filled Color.yellow
+                |> Collage.move (getOffset x y)
 
 
 renderMap : Model -> Form
@@ -53,17 +55,24 @@ renderMap model =
             |> Collage.filled Color.blue
 
 
+renderSnake : Model -> Form
+renderSnake model =
+    let
+        color =
+            if model.collision then
+                Color.red
+            else
+                Color.green
+    in
+        List.map (renderSegment color) model.snake
+            |> translateObjects
+
+
 renderSegment : Color -> Vector -> Form
 renderSegment color vector =
     let
         tileSize' =
             toFloat tileSize
-
-        offsetX =
-            tileSize * vector.x |> toFloat
-
-        offsetY =
-            tileSize * vector.y |> toFloat
 
         outline =
             Collage.rect tileSize' tileSize'
@@ -74,7 +83,7 @@ renderSegment color vector =
                 |> Collage.filled color
     in
         Collage.group [ outline, body ]
-            |> Collage.move ( offsetX, offsetY )
+            |> Collage.move (getOffset vector.x vector.y)
 
 
 translateObjects : List Form -> Form
@@ -87,3 +96,8 @@ translateObjects objects =
             Transform.translation offset offset
     in
         Collage.groupTransform transformation objects
+
+
+getOffset : Int -> Int -> ( Float, Float )
+getOffset x y =
+    ( tileSize * x |> toFloat, tileSize * y |> toFloat )

@@ -19,6 +19,7 @@ tickLength =
 type Msg
     = Tick Float
     | UserInput UserAction
+    | SpawnFood ( Int, Int )
 
 
 type alias Model =
@@ -27,6 +28,7 @@ type alias Model =
     , snake : Snake
     , delta : Float
     , collision : Bool
+    , food : Maybe Food
     }
 
 
@@ -38,6 +40,12 @@ type alias Vector =
     { x : Int
     , y : Int
     , direction : Direction
+    }
+
+
+type alias Food =
+    { x : Int
+    , y : Int
     }
 
 

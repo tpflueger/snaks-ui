@@ -1,6 +1,7 @@
 module State exposing (init, update, subscriptions)
 
 import Char
+import Random
 import AnimationFrame
 import Time exposing (millisecond)
 import Keyboard exposing (KeyCode)
@@ -10,12 +11,12 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    Model mapSize mapSize initSnake 0 False ! []
+    Model mapSize mapSize initSnake 0 False Nothing ! [ getFoodCoord ]
 
 
 initSnake : Snake
 initSnake =
-    [ Vector 3 3 North, Vector 3 2 North, Vector 3 1 North, Vector 3 0 North, Vector 2 0 East ]
+    [ Vector 3 3 North, Vector 3 2 North, Vector 3 1 North ]
 
 
 subscriptions : Model -> Sub Msg
@@ -30,11 +31,21 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Tick delta ->
-            (model
-                |> sync delta
-                |> moveSnake
-            )
-                ! []
+            let
+                foodCmd =
+                    if model.food == Nothing then
+                        getFoodCoord
+                    else
+                        Cmd.none
+            in
+                (model
+                    |> sync delta
+                    |> moveSnake
+                )
+                    ! [ foodCmd ]
+
+        SpawnFood ( x, y ) ->
+            { model | food = Just <| Food x y } ! []
 
         UserInput action ->
             case action of
@@ -66,21 +77,40 @@ sync delta model =
 
 moveSnake : Model -> Model
 moveSnake model =
-    if not model.collision && model.delta == 0 then
+    if model.collision || model.delta > 0 then
+        model
+    else
         case model.snake of
             [] ->
                 model
 
             head :: rest ->
-                if newHead head |> collision rest then
-                    { model | snake = head :: rest, collision = True }
-                else
-                    { model
-                        | snake =
-                            newHead head :: head :: rest |> List.dropTail 1
-                    }
-    else
-        model
+                let
+                    head' =
+                        newHead head
+                in
+                    if collision rest head' then
+                        { model | collision = True }
+                    else if foodCollision model.food head' then
+                        { model
+                            | food = Nothing
+                            , snake = head' :: head :: rest
+                        }
+                    else
+                        { model
+                            | snake =
+                                head' :: head :: rest |> List.dropTail 1
+                        }
+
+
+foodCollision : Maybe Food -> Vector -> Bool
+foodCollision food vector =
+    case food of
+        Nothing ->
+            False
+
+        Just { x, y } ->
+            x == vector.x && y == vector.y
 
 
 collision : List Vector -> Vector -> Bool
@@ -193,3 +223,9 @@ keyCodeToAction keycode =
 
         _ ->
             NoOp
+
+
+getFoodCoord : Cmd Msg
+getFoodCoord =
+    Random.pair (Random.int 1 30) (Random.int 1 30)
+        |> Random.generate SpawnFood
