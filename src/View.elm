@@ -21,25 +21,16 @@ view model =
             Collage.collage mapSizePx
                 mapSizePx
                 [ renderMap model
-                , renderSnake model
-                , [ renderFood model ] |> translateObjects
+                , renderObjects model
                 ]
         , text "Press [Space] to reset."
         ]
 
 
-renderFood : Model -> Form
-renderFood model =
-    case model.food of
-        Nothing ->
-            Collage.square 0
-                |> Collage.filled Color.blue
-
-        Just { x, y } ->
-            toFloat tileSize
-                |> Collage.square
-                |> Collage.filled Color.yellow
-                |> Collage.move (getOffset x y)
+renderObjects : Model -> Form
+renderObjects model =
+    [ renderSnake model, renderFood model ]
+        |> translateObjects
 
 
 renderMap : Model -> Form
@@ -65,7 +56,7 @@ renderSnake model =
                 Color.green
     in
         List.map (renderSegment color) model.snake
-            |> translateObjects
+            |> Collage.group
 
 
 renderSegment : Color -> Vector -> Form
@@ -84,6 +75,20 @@ renderSegment color vector =
     in
         Collage.group [ outline, body ]
             |> Collage.move (getOffset vector.x vector.y)
+
+
+renderFood : Model -> Form
+renderFood model =
+    case model.food of
+        Nothing ->
+            Collage.square 0
+                |> Collage.filled Color.blue
+
+        Just { x, y } ->
+            toFloat tileSize
+                |> Collage.square
+                |> Collage.filled Color.yellow
+                |> Collage.move (getOffset x y)
 
 
 translateObjects : List Form -> Form
