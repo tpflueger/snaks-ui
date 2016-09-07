@@ -29,7 +29,7 @@ init =
 
 initSnake : Snake
 initSnake =
-    [ Vector 3 3 North ]
+    [ Vector 3 3 North, Vector 3 2 North, Vector 3 1 North ]
 
 
 subscriptions : Model -> Sub Msg
@@ -70,21 +70,17 @@ moveSnake : Model -> Model
 moveSnake model =
     if model.delta == 0 then
         case model.snake of
-            head :: rest ->
-                let
-                    head' =
-                        moveSegment head
-                in
-                    { model | snake = head' :: rest }
-
-            _ ->
+            [] ->
                 model
+
+            head :: rest ->
+                { model | snake = newHead head :: head :: removeTail rest }
     else
         model
 
 
-moveSegment : Vector -> Vector
-moveSegment { x, y, direction } =
+newHead : Vector -> Vector
+newHead { x, y, direction } =
     let
         ( x', y' ) =
             case direction of
@@ -101,6 +97,19 @@ moveSegment { x, y, direction } =
                     ( x - 1, y )
     in
         Vector x' y' direction
+
+
+removeTail : List Vector -> List Vector
+removeTail vectors =
+    case vectors of
+        head :: [] ->
+            []
+
+        head :: tail ->
+            head :: removeTail tail
+
+        _ ->
+            []
 
 
 changeSnakeDirection : KeyCode -> Snake -> Snake
