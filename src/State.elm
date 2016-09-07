@@ -4,6 +4,7 @@ import Char
 import AnimationFrame
 import Time exposing (millisecond)
 import Keyboard exposing (KeyCode)
+import Extra.List as List
 import Types exposing (Msg(..), Model, Snake, Vector, Direction(..))
 
 
@@ -74,7 +75,7 @@ moveSnake model =
                 model
 
             head :: rest ->
-                { model | snake = newHead head :: head :: removeTail rest }
+                { model | snake = newHead head :: head :: List.dropTail 1 rest }
     else
         model
 
@@ -97,19 +98,6 @@ newHead { x, y, direction } =
                     ( x - 1, y )
     in
         Vector x' y' direction
-
-
-removeTail : List Vector -> List Vector
-removeTail vectors =
-    case vectors of
-        head :: [] ->
-            []
-
-        head :: tail ->
-            head :: removeTail tail
-
-        _ ->
-            []
 
 
 changeSnakeDirection : KeyCode -> Snake -> Snake
