@@ -1,16 +1,18 @@
 module Types exposing (..)
 
-import Time exposing (Time)
+import Keyboard exposing (KeyCode)
 
 
 type Msg
-    = Tick Time
+    = Tick Float
+    | ChangeDirection KeyCode
 
 
 type alias Model =
     { width : Int
     , height : Int
     , snake : Snake
+    , delta : Float
     }
 
 

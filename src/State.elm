@@ -1,6 +1,9 @@
 module State exposing (init, update, subscriptions, mapSize, tileSize)
 
-import Time exposing (second)
+import Char
+import AnimationFrame
+import Time exposing (millisecond)
+import Keyboard exposing (KeyCode)
 import Types exposing (Msg(..), Model, Snake, Vector, Direction(..))
 
 
@@ -14,9 +17,14 @@ tileSize =
     16
 
 
+tickLength : Float
+tickLength =
+    150
+
+
 init : ( Model, Cmd Msg )
 init =
-    Model mapSize mapSize initSnake ! []
+    Model mapSize mapSize initSnake 0 ! []
 
 
 initSnake : Snake
@@ -24,25 +32,55 @@ initSnake =
     [ Vector 3 3 North ]
 
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ AnimationFrame.diffs Tick
+        , Keyboard.presses ChangeDirection
+        ]
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Tick _ ->
-            moveSnake model ! []
+        Tick delta ->
+            (model
+                |> sync delta
+                |> moveSnake
+            )
+                ! []
+
+        ChangeDirection keycode ->
+            { model | snake = changeSnakeDirection keycode model.snake } ! []
+
+
+sync : Float -> Model -> Model
+sync delta model =
+    let
+        delta' =
+            model.delta + delta
+    in
+        if Time.inMilliseconds delta' > tickLength then
+            { model | delta = 0 }
+        else
+            { model | delta = delta' }
 
 
 moveSnake : Model -> Model
 moveSnake model =
-    case model.snake of
-        head :: rest ->
-            let
-                head' =
-                    moveSegment head
-            in
-                { model | snake = head' :: rest }
+    if model.delta == 0 then
+        case model.snake of
+            head :: rest ->
+                let
+                    head' =
+                        moveSegment head
+                in
+                    { model | snake = head' :: rest }
 
-        _ ->
-            model
+            _ ->
+                model
+    else
+        model
 
 
 moveSegment : Vector -> Vector
@@ -65,6 +103,29 @@ moveSegment { x, y, direction } =
         Vector x' y' direction
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Time.every second Tick
+changeSnakeDirection : KeyCode -> Snake -> Snake
+changeSnakeDirection keycode snake =
+    case snake of
+        [] ->
+            snake
+
+        head :: tail ->
+            let
+                direction' =
+                    case Char.fromCode keycode of
+                        'w' ->
+                            North
+
+                        's' ->
+                            South
+
+                        'd' ->
+                            East
+
+                        'a' ->
+                            West
+
+                        _ ->
+                            head.direction
+            in
+                { head | direction = direction' } :: tail
