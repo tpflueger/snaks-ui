@@ -1,8 +1,10 @@
 module Types exposing (..)
 
+import Time exposing (Time)
+
 
 type Msg
-    = NoOp
+    = Tick Time
 
 
 type alias Model =
@@ -19,4 +21,12 @@ type alias Snake =
 type alias Vector =
     { x : Int
     , y : Int
+    , direction : Direction
     }
+
+
+type Direction
+    = North
+    | South
+    | East
+    | West
