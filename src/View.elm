@@ -1,35 +1,35 @@
 module View exposing (view)
 
-import Color
-import Html exposing (Html, div)
+import Color exposing (Color)
+import Html exposing (Html, div, text)
 import Html.Attributes as Attr
 import Collage exposing (Form)
 import Element exposing (toHtml)
 import Transform
-import Types exposing (Model, Vector, Msg)
-import State exposing (tileSize, mapSize)
+import Types exposing (Model, Vector, Msg, tileSize, mapSize)
 
 
-(=>) : String -> String -> ( String, String )
-(=>) x y =
-    ( x, y )
+mapSizePx : Int
+mapSizePx =
+    mapSize * tileSize
 
 
 view : Model -> Html Msg
 view model =
-    div [ Attr.style [ "width" => "100%", "height" => "100%" ] ]
+    div [ Attr.class "game-container" ]
         [ toHtml <|
-            Collage.collage 500
-                500
+            Collage.collage mapSizePx
+                mapSizePx
                 [ renderMap model
                 , renderObjects model
                 ]
+        , text "Press [Space] to reset."
         ]
 
 
 renderObjects : Model -> Form
 renderObjects model =
-    List.map renderSegment model.snake
+    [ renderSnake model, renderFood model ]
         |> translateObjects
 
 
@@ -46,17 +46,24 @@ renderMap model =
             |> Collage.filled Color.blue
 
 
-renderSegment : Vector -> Form
-renderSegment vector =
+renderSnake : Model -> Form
+renderSnake model =
+    let
+        color =
+            if model.collision then
+                Color.red
+            else
+                Color.green
+    in
+        List.map (renderSegment color) model.snake
+            |> Collage.group
+
+
+renderSegment : Color -> Vector -> Form
+renderSegment color vector =
     let
         tileSize' =
             toFloat tileSize
-
-        offsetX =
-            tileSize * vector.x |> toFloat
-
-        offsetY =
-            tileSize * vector.y |> toFloat
 
         outline =
             Collage.rect tileSize' tileSize'
@@ -64,19 +71,38 @@ renderSegment vector =
 
         body =
             Collage.rect (tileSize' - 1) (tileSize' - 1)
-                |> Collage.filled Color.red
+                |> Collage.filled color
     in
         Collage.group [ outline, body ]
-            |> Collage.move ( offsetX, offsetY )
+            |> Collage.move (getOffset vector.x vector.y)
+
+
+renderFood : Model -> Form
+renderFood model =
+    case model.food of
+        Nothing ->
+            Collage.square 0
+                |> Collage.filled Color.blue
+
+        Just { x, y } ->
+            toFloat tileSize
+                |> Collage.square
+                |> Collage.filled Color.yellow
+                |> Collage.move (getOffset x y)
 
 
 translateObjects : List Form -> Form
 translateObjects objects =
     let
         offset =
-            -mapSize * tileSize // 2 + tileSize // 2 |> toFloat
+            -mapSizePx // 2 + tileSize // 2 |> toFloat
 
         transformation =
             Transform.translation offset offset
     in
         Collage.groupTransform transformation objects
+
+
+getOffset : Int -> Int -> ( Float, Float )
+getOffset x y =
+    ( tileSize * x |> toFloat, tileSize * y |> toFloat )
