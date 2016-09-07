@@ -121,20 +121,59 @@ changeSnakeDirection keycode snake =
         head :: tail ->
             let
                 direction' =
-                    case Char.fromCode keycode of
-                        'w' ->
-                            North
-
-                        's' ->
-                            South
-
-                        'd' ->
-                            East
-
-                        'a' ->
-                            West
-
-                        _ ->
+                    case tail of
+                        [] ->
                             head.direction
+
+                        next :: _ ->
+                            keyToDirection head.direction keycode
+                                |> preventReverse head next
             in
                 { head | direction = direction' } :: tail
+
+
+keyToDirection : Direction -> KeyCode -> Direction
+keyToDirection default keycode =
+    case Char.fromCode keycode of
+        'w' ->
+            North
+
+        's' ->
+            South
+
+        'd' ->
+            East
+
+        'a' ->
+            West
+
+        _ ->
+            default
+
+
+preventReverse : Vector -> Vector -> Direction -> Direction
+preventReverse head next direction =
+    case direction of
+        North ->
+            if head.y + 1 == next.y then
+                head.direction
+            else
+                North
+
+        South ->
+            if head.y - 1 == next.y then
+                head.direction
+            else
+                South
+
+        East ->
+            if head.x + 1 == next.x then
+                head.direction
+            else
+                East
+
+        West ->
+            if head.x - 1 == next.x then
+                head.direction
+            else
+                West
