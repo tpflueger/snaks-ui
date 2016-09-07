@@ -1,23 +1,17 @@
 module View exposing (view)
 
-import Color
+import Color exposing (Color)
 import Html exposing (Html, div)
 import Html.Attributes as Attr
 import Collage exposing (Form)
 import Element exposing (toHtml)
 import Transform
-import Types exposing (Model, Vector, Msg)
-import State exposing (tileSize, mapSize)
-
-
-(=>) : String -> String -> ( String, String )
-(=>) x y =
-    ( x, y )
+import Types exposing (Model, Vector, Msg, tileSize, mapSize)
 
 
 view : Model -> Html Msg
 view model =
-    div [ Attr.style [ "width" => "100%", "height" => "100%" ] ]
+    div [ Attr.class "game-container" ]
         [ toHtml <|
             Collage.collage 500
                 500
@@ -29,8 +23,15 @@ view model =
 
 renderObjects : Model -> Form
 renderObjects model =
-    List.map renderSegment model.snake
-        |> translateObjects
+    let
+        color =
+            if model.collision then
+                Color.red
+            else
+                Color.green
+    in
+        List.map (renderSegment color) model.snake
+            |> translateObjects
 
 
 renderMap : Model -> Form
@@ -46,8 +47,8 @@ renderMap model =
             |> Collage.filled Color.blue
 
 
-renderSegment : Vector -> Form
-renderSegment vector =
+renderSegment : Color -> Vector -> Form
+renderSegment color vector =
     let
         tileSize' =
             toFloat tileSize
@@ -64,7 +65,7 @@ renderSegment vector =
 
         body =
             Collage.rect (tileSize' - 1) (tileSize' - 1)
-                |> Collage.filled Color.red
+                |> Collage.filled color
     in
         Collage.group [ outline, body ]
             |> Collage.move ( offsetX, offsetY )

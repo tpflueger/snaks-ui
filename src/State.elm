@@ -1,31 +1,16 @@
-module State exposing (init, update, subscriptions, mapSize, tileSize)
+module State exposing (init, update, subscriptions)
 
 import Char
 import AnimationFrame
 import Time exposing (millisecond)
 import Keyboard exposing (KeyCode)
 import Extra.List as List
-import Types exposing (Msg(..), Model, Snake, Vector, Direction(..))
-
-
-mapSize : Int
-mapSize =
-    16
-
-
-tileSize : Int
-tileSize =
-    16
-
-
-tickLength : Float
-tickLength =
-    150
+import Types exposing (..)
 
 
 init : ( Model, Cmd Msg )
 init =
-    Model mapSize mapSize initSnake 0 ! []
+    Model mapSize mapSize initSnake 0 False ! []
 
 
 initSnake : Snake
@@ -69,13 +54,28 @@ sync delta model =
 
 moveSnake : Model -> Model
 moveSnake model =
-    if model.delta == 0 then
+    if not model.collision && model.delta == 0 then
         case model.snake of
             [] ->
                 model
 
             head :: rest ->
-                { model | snake = newHead head :: head :: List.dropTail 1 rest }
+                let
+                    head' =
+                        newHead head
+                in
+                    if
+                        (head'.x >= mapSize)
+                            || (head'.x < 0)
+                            || (head'.y >= mapSize)
+                            || (head'.y < 0)
+                    then
+                        { model | snake = head :: rest, collision = True }
+                    else
+                        { model
+                            | snake =
+                                head' :: head :: rest |> List.dropTail 1
+                        }
     else
         model
 

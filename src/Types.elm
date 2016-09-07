@@ -3,6 +3,21 @@ module Types exposing (..)
 import Keyboard exposing (KeyCode)
 
 
+mapSize : Int
+mapSize =
+    16
+
+
+tileSize : Int
+tileSize =
+    16
+
+
+tickLength : Float
+tickLength =
+    150
+
+
 type Msg
     = Tick Float
     | ChangeDirection KeyCode
@@ -13,6 +28,7 @@ type alias Model =
     , height : Int
     , snake : Snake
     , delta : Float
+    , collision : Bool
     }
 
 
