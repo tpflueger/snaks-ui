@@ -1,7 +1,5 @@
 module Types exposing (..)
 
-import Keyboard exposing (KeyCode)
-
 
 mapSize : Int
 mapSize =
@@ -20,7 +18,7 @@ tickLength =
 
 type Msg
     = Tick Float
-    | UserInput KeyCode
+    | UserInput UserAction
 
 
 type alias Model =
@@ -48,3 +46,9 @@ type Direction
     | South
     | East
     | West
+
+
+type UserAction
+    = NoOp
+    | Reset
+    | ChangeDirection Direction

@@ -1,7 +1,6 @@
 module State exposing (init, update, subscriptions)
 
 import Char
-import String
 import AnimationFrame
 import Time exposing (millisecond)
 import Keyboard exposing (KeyCode)
@@ -16,14 +15,14 @@ init =
 
 initSnake : Snake
 initSnake =
-    [ Vector 3 3 North, Vector 3 2 North, Vector 3 1 North ]
+    [ Vector 3 3 North, Vector 3 2 North, Vector 3 1 North, Vector 3 0 North, Vector 2 0 East ]
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ AnimationFrame.diffs Tick
-        , Keyboard.presses UserInput
+        , Keyboard.presses (UserInput << keyCodeToAction)
         ]
 
 
@@ -37,20 +36,20 @@ update msg model =
             )
                 ! []
 
-        UserInput keycode ->
-            let
-                str =
-                    Char.fromCode keycode
-                        |> String.fromChar
-            in
-                if String.contains str "wasd" then
+        UserInput action ->
+            case action of
+                NoOp ->
+                    model ! []
+
+                Reset ->
+                    init
+
+                _ ->
                     { model
                         | snake =
-                            changeSnakeDirection keycode model.snake
+                            changeSnakeDirection action model.snake
                     }
                         ! []
-                else
-                    init
 
 
 sync : Float -> Model -> Model
@@ -59,7 +58,7 @@ sync delta model =
         delta' =
             model.delta + delta
     in
-        if Time.inMilliseconds delta' > tickLength then
+        if Time.inMilliseconds delta' >= tickLength then
             { model | delta = 0 }
         else
             { model | delta = delta' }
@@ -73,24 +72,27 @@ moveSnake model =
                 model
 
             head :: rest ->
-                let
-                    head' =
-                        newHead head
-                in
-                    if
-                        (head'.x >= mapSize)
-                            || (head'.x < 0)
-                            || (head'.y >= mapSize)
-                            || (head'.y < 0)
-                    then
-                        { model | snake = head :: rest, collision = True }
-                    else
-                        { model
-                            | snake =
-                                head' :: head :: rest |> List.dropTail 1
-                        }
+                if newHead head |> collision rest then
+                    { model | snake = head :: rest, collision = True }
+                else
+                    { model
+                        | snake =
+                            newHead head :: head :: rest |> List.dropTail 1
+                    }
     else
         model
+
+
+collision : List Vector -> Vector -> Bool
+collision vectors { x, y } =
+    let
+        hitWall =
+            x >= mapSize || x < 0 || y >= mapSize || y < 0
+
+        hitSelf =
+            List.any (\v -> x == v.x && y == v.y) vectors
+    in
+        hitWall || hitSelf
 
 
 newHead : Vector -> Vector
@@ -113,8 +115,8 @@ newHead { x, y, direction } =
         Vector x' y' direction
 
 
-changeSnakeDirection : KeyCode -> Snake -> Snake
-changeSnakeDirection keycode snake =
+changeSnakeDirection : UserAction -> Snake -> Snake
+changeSnakeDirection action snake =
     case snake of
         [] ->
             snake
@@ -127,26 +129,17 @@ changeSnakeDirection keycode snake =
                             head.direction
 
                         next :: _ ->
-                            keyToDirection head.direction keycode
+                            directionFromAction head.direction action
                                 |> preventReverse head next
             in
                 { head | direction = direction' } :: tail
 
 
-keyToDirection : Direction -> KeyCode -> Direction
-keyToDirection default keycode =
-    case Char.fromCode keycode of
-        'w' ->
-            North
-
-        's' ->
-            South
-
-        'd' ->
-            East
-
-        'a' ->
-            West
+directionFromAction : Direction -> UserAction -> Direction
+directionFromAction default action =
+    case action of
+        ChangeDirection direction ->
+            direction
 
         _ ->
             default
@@ -178,3 +171,25 @@ preventReverse head next direction =
                 head.direction
             else
                 West
+
+
+keyCodeToAction : KeyCode -> UserAction
+keyCodeToAction keycode =
+    case Char.fromCode keycode of
+        'w' ->
+            ChangeDirection North
+
+        's' ->
+            ChangeDirection South
+
+        'd' ->
+            ChangeDirection East
+
+        'a' ->
+            ChangeDirection West
+
+        ' ' ->
+            Reset
+
+        _ ->
+            NoOp
