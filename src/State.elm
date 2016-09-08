@@ -11,7 +11,7 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    Model mapSize mapSize initSnake 0 False Nothing ! [ getFoodCoord ]
+    Model initSnake 0 False Nothing ! [ getFoodCoord ]
 
 
 initSnake : Snake

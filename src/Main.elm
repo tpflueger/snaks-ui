@@ -5,9 +5,6 @@ import State
 import View
 
 
--- MAIN
-
-
 main : Program Never
 main =
     Html.App.program

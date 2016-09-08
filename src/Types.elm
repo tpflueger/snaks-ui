@@ -13,7 +13,7 @@ tileSize =
 
 tickLength : Float
 tickLength =
-    150
+    125
 
 
 type Msg
@@ -23,9 +23,7 @@ type Msg
 
 
 type alias Model =
-    { width : Int
-    , height : Int
-    , snake : Snake
+    { snake : Snake
     , delta : Float
     , collision : Bool
     , food : Maybe Food

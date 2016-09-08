@@ -3,7 +3,7 @@ module View exposing (view)
 import Color exposing (Color)
 import Html exposing (Html, div, text)
 import Html.Attributes as Attr
-import Collage exposing (Form)
+import Collage exposing (Form, collage)
 import Element exposing (toHtml)
 import Transform
 import Types exposing (Model, Vector, Msg, tileSize, mapSize)
@@ -18,7 +18,7 @@ view : Model -> Html Msg
 view model =
     div [ Attr.class "game-container" ]
         [ toHtml <|
-            Collage.collage mapSizePx
+            collage mapSizePx
                 mapSizePx
                 [ renderMap model
                 , renderObjects model
@@ -36,15 +36,9 @@ renderObjects model =
 
 renderMap : Model -> Form
 renderMap model =
-    let
-        width =
-            model.width * tileSize |> toFloat
-
-        height =
-            model.height * tileSize |> toFloat
-    in
-        Collage.rect width height
-            |> Collage.filled Color.blue
+    toFloat mapSizePx
+        |> Collage.square
+        |> Collage.filled Color.blue
 
 
 renderSnake : Model -> Form
@@ -63,15 +57,15 @@ renderSnake model =
 renderSegment : Color -> Vector -> Form
 renderSegment color vector =
     let
-        tileSize' =
-            toFloat tileSize
-
         outline =
-            Collage.rect tileSize' tileSize'
+            toFloat tileSize
+                |> Collage.square
                 |> Collage.filled Color.white
 
         body =
-            Collage.rect (tileSize' - 1) (tileSize' - 1)
+            toFloat tileSize
+                - 1
+                |> Collage.square
                 |> Collage.filled color
     in
         Collage.group [ outline, body ]
