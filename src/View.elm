@@ -1,12 +1,10 @@
 module View exposing (view)
 
-import Color exposing (Color)
+import Svg exposing (Svg, Attribute)
+import Svg.Attributes as SvgA
 import Html exposing (Html, div, text)
-import Html.Attributes as Attr
-import Collage exposing (Form, collage)
-import Element exposing (toHtml)
-import Transform
-import Types exposing (Model, Vector, Msg, tileSize, mapSize)
+import Html.Attributes as HtmlA
+import Types exposing (Msg, Model, Vector, mapSize, tileSize)
 
 
 mapSizePx : Int
@@ -14,90 +12,98 @@ mapSizePx =
     mapSize * tileSize
 
 
-getOffset : Int -> Int -> ( Float, Float )
-getOffset x y =
-    ( tileSize * x |> toFloat, tileSize * y |> toFloat )
+width : Int -> Attribute Msg
+width w =
+    toString w |> SvgA.width
+
+
+height : Int -> Attribute Msg
+height h =
+    toString h |> SvgA.height
+
+
+offsetX : Int -> Attribute Msg
+offsetX x =
+    x * tileSize |> toString |> SvgA.x
+
+
+offsetY : Int -> Attribute Msg
+offsetY y =
+    y * tileSize |> toString |> SvgA.y
+
+
+square : Int -> List (Attribute Msg) -> List (Svg Msg) -> Svg Msg
+square dim attr children =
+    let
+        attr' =
+            width dim :: height dim :: attr
+    in
+        Svg.rect attr' children
 
 
 view : Model -> Html Msg
 view model =
-    div [ Attr.class "game-container" ]
-        [ toHtml <|
-            collage mapSizePx
-                mapSizePx
-                [ renderMap model
-                , renderObjects model
-                ]
+    div [ HtmlA.class "game-container" ]
+        [ Svg.svg [ width mapSizePx, height mapSizePx ]
+            [ renderMap model
+            , renderObjects model
+            ]
         , div [] [ text "Control snake with WASD." ]
         , div [] [ text "Press [Space] to reset." ]
         ]
 
 
-renderMap : Model -> Form
+renderMap : Model -> Svg Msg
 renderMap model =
-    toFloat mapSizePx
-        |> Collage.square
-        |> Collage.filled Color.blue
+    square mapSizePx [ SvgA.fill "#3465a4" ] []
 
 
-renderObjects : Model -> Form
+renderObjects : Model -> Svg Msg
 renderObjects model =
-    [ renderSnake model, renderFood model ]
-        |> translateObjects
+    Svg.g
+        [ "translate(0, "
+            ++ toString mapSizePx
+            ++ ") scale(1, -1)"
+            |> SvgA.transform
+        ]
+        [ renderSnake model, renderFood model ]
 
 
-renderSnake : Model -> Form
+renderSnake : Model -> Svg Msg
 renderSnake model =
     let
         color =
             if model.collision then
-                Color.red
+                "#cc0000"
             else
-                Color.green
+                "#73d216"
     in
         List.map (renderSegment color) model.snake
-            |> Collage.group
+            |> Svg.g []
 
 
-renderSegment : Color -> Vector -> Form
+renderSegment : String -> Vector -> Svg Msg
 renderSegment color vector =
-    let
-        outline =
-            toFloat tileSize
-                |> Collage.square
-                |> Collage.filled Color.white
-
-        body =
-            toFloat tileSize
-                - 1
-                |> Collage.square
-                |> Collage.filled color
-    in
-        Collage.group [ outline, body ]
-            |> Collage.move (getOffset vector.x vector.y)
+    square tileSize
+        [ offsetX vector.x
+        , offsetY vector.y
+        , SvgA.fill color
+        , SvgA.stroke "#eeeeec"
+        , SvgA.strokeWidth "1"
+        ]
+        []
 
 
-renderFood : Model -> Form
+renderFood : Model -> Svg Msg
 renderFood model =
     case model.food of
         Nothing ->
-            Collage.square 0
-                |> Collage.filled Color.blue
+            Svg.g [] []
 
-        Just { x, y } ->
-            toFloat tileSize
-                |> Collage.square
-                |> Collage.filled Color.yellow
-                |> Collage.move (getOffset x y)
-
-
-translateObjects : List Form -> Form
-translateObjects objects =
-    let
-        offset =
-            -mapSizePx // 2 + tileSize // 2 |> toFloat
-
-        transformation =
-            Transform.translation offset offset
-    in
-        Collage.groupTransform transformation objects
+        Just vector ->
+            square tileSize
+                [ offsetX vector.x
+                , offsetY vector.y
+                , SvgA.fill "#edd400"
+                ]
+                []
