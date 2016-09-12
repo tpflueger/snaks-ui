@@ -24,7 +24,6 @@ type Msg
 
 type alias Model =
     { snake : Snake
-    , delta : Float
     , collision : Bool
     , food : Maybe Food
     }

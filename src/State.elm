@@ -2,7 +2,6 @@ module State exposing (init, update, subscriptions)
 
 import Char
 import Random
-import AnimationFrame
 import Time exposing (millisecond)
 import Keyboard exposing (KeyCode)
 import Extra.List as List
@@ -11,7 +10,7 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    Model initSnake 0 False Nothing ! [ getFoodCoord ]
+    Model initSnake False Nothing ! [ getFoodCoord ]
 
 
 initSnake : Snake
@@ -22,7 +21,7 @@ initSnake =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ AnimationFrame.diffs Tick
+        [ Time.every (tickLength * millisecond) Tick
         , Keyboard.presses (UserInput << keyCodeToAction)
         ]
 
@@ -38,10 +37,7 @@ update msg model =
                     else
                         Cmd.none
             in
-                (model
-                    |> sync delta
-                    |> moveSnake
-                )
+                moveSnake model
                     ! [ foodCmd ]
 
         SpawnFood ( x, y ) ->
@@ -63,44 +59,29 @@ update msg model =
                         ! []
 
 
-sync : Float -> Model -> Model
-sync delta model =
-    let
-        delta' =
-            model.delta + delta
-    in
-        if Time.inMilliseconds delta' >= tickLength then
-            { model | delta = 0 }
-        else
-            { model | delta = delta' }
-
-
 moveSnake : Model -> Model
 moveSnake model =
-    if model.collision || model.delta > 0 then
-        model
-    else
-        case model.snake of
-            [] ->
-                model
+    case model.snake of
+        [] ->
+            model
 
-            head :: rest ->
-                let
-                    head' =
-                        newHead head
-                in
-                    if collision rest head' then
-                        { model | collision = True }
-                    else if foodCollision model.food head' then
-                        { model
-                            | food = Nothing
-                            , snake = head' :: head :: rest
-                        }
-                    else
-                        { model
-                            | snake =
-                                head' :: head :: rest |> List.dropTail 1
-                        }
+        head :: rest ->
+            let
+                head' =
+                    newHead head
+            in
+                if collision rest head' then
+                    { model | collision = True }
+                else if foodCollision model.food head' then
+                    { model
+                        | food = Nothing
+                        , snake = head' :: head :: rest
+                    }
+                else
+                    { model
+                        | snake =
+                            head' :: head :: rest |> List.dropTail 1
+                    }
 
 
 foodCollision : Maybe Food -> Vector -> Bool
