@@ -14,6 +14,11 @@ mapSizePx =
     mapSize * tileSize
 
 
+getOffset : Int -> Int -> ( Float, Float )
+getOffset x y =
+    ( tileSize * x |> toFloat, tileSize * y |> toFloat )
+
+
 view : Model -> Html Msg
 view model =
     div [ Attr.class "game-container" ]
@@ -28,17 +33,17 @@ view model =
         ]
 
 
-renderObjects : Model -> Form
-renderObjects model =
-    [ renderSnake model, renderFood model ]
-        |> translateObjects
-
-
 renderMap : Model -> Form
 renderMap model =
     toFloat mapSizePx
         |> Collage.square
         |> Collage.filled Color.blue
+
+
+renderObjects : Model -> Form
+renderObjects model =
+    [ renderSnake model, renderFood model ]
+        |> translateObjects
 
 
 renderSnake : Model -> Form
@@ -96,8 +101,3 @@ translateObjects objects =
             Transform.translation offset offset
     in
         Collage.groupTransform transformation objects
-
-
-getOffset : Int -> Int -> ( Float, Float )
-getOffset x y =
-    ( tileSize * x |> toFloat, tileSize * y |> toFloat )
